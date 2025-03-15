@@ -1,7 +1,7 @@
 name: Daily YouTube Upload
 on:
   schedule:
-    - cron: '12 19 * * *'  # 7:12 PM UTC = 12:42 AM IST
+    - cron: '17 19 * * *'  # 7:12 PM UTC = 12:42 AM IST
 jobs:
   upload:
     runs-on: ubuntu-latest
