@@ -5,7 +5,7 @@ from googleapiclient.http import MediaFileUpload
 import os
 import json
 
-VIDEO_URL = "https://youtube.com/shorts/Vfzn14BYkag"
+VIDEO_URL = "https://youtube.com/shorts/Vfzn14BYkag?si=1HCEoPE4MfjzKaNs"
 
 # Load service account key from environment variable
 key_info = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_KEY'])
