@@ -1,4 +1,4 @@
-import yt_dlp
+from pytube import YouTube
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -14,16 +14,14 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 drive_service = build('drive', 'v3', credentials=credentials)
 
-# Download video with cookies
-ydl_opts = {
-    'outtmpl': '/tmp/downloaded_video.%(ext)s',
-    'format': 'best',
-    'quiet': True,
-    'cookiefile': 'cookies.txt',  # Reference the cookies file
-}
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    info = ydl.extract_info(VIDEO_URL, download=True)
-    video_file = ydl.prepare_filename(info)
+# Download video with pytube
+try:
+    yt = YouTube(VIDEO_URL)
+    stream = yt.streams.get_highest_resolution()
+    video_file = stream.download(output_path="/tmp", filename="downloaded_video.mp4")
+except Exception as e:
+    print(f"Download failed: {str(e)}")
+    raise
 
 # Upload to Drive
 file_metadata = {'name': os.path.basename(video_file)}
