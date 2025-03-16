@@ -1,42 +1,34 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import yt_dlp
+import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import os
-import json
-import time
 
-VIDEO_URL = "https://youtube.com/shorts/Vfzn14BYkag"
+VIDEO_URL = "https://youtube.com/shorts/IfhmGncKxr8?si=TRluM1eO-477JuBL"  # Replace with your desired YouTube Short URL
 
-# Set up headless Chrome
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-driver = webdriver.Chrome(options=chrome_options)
+# Download YouTube Short with yt_dlp
+ydl_opts = {
+    'outtmpl': 'video.%(ext)s',
+    'format': 'best',
+}
+with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    ydl.download([VIDEO_URL])
+    info = ydl.extract_info(VIDEO_URL, download=False)
+    video_file = f"video.{info['ext']}"
 
-# Load service account key
-key_info = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_KEY'])
-credentials = service_account.Credentials.from_service_account_info(
-    key_info, scopes=['https://www.googleapis.com/auth/drive']
+# Authenticate with Google Drive
+key_info = json.loads(os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY"))
+creds = service_account.Credentials.from_service_account_info(
+    key_info,
+    scopes=["https://www.googleapis.com/auth/drive"]
 )
-drive_service = build('drive', 'v3', credentials=credentials)
+drive_service = build("drive", "v3", credentials=creds)
 
-# Navigate to video and download (simplified; adjust based on Shorts behavior)
-driver.get(VIDEO_URL)
-time.sleep(5)  # Wait for page to load (adjust as needed)
-
-# Note: Direct download via Selenium for Shorts is tricky; you may need a browser extension or manual click simulation
-# For now, this is a placeholder. You’d need to extract the video URL or use a download helper.
-print("Download logic needs implementation for Shorts; see notes below.")
-video_file = "/tmp/downloaded_video.mp4"  # Placeholder path
-
-# Upload to Drive (assuming download succeeds)
-file_metadata = {'name': os.path.basename(video_file)}
+# Upload to Google Drive
+file_metadata = {"name": video_file}
 media = MediaFileUpload(video_file)
-drive_service.files().create(body=file_metadata, media_body=media).execute()
+drive_service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
-driver.quit()
-os.remove(video_file)  # Clean up if file exists
-print("Done!")
+# Clean up
+os.remove(video_file)
