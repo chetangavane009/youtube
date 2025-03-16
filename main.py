@@ -1,4 +1,3 @@
-# main.py
 import yt_dlp
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -15,11 +14,12 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 drive_service = build('drive', 'v3', credentials=credentials)
 
-# Download video
+# Download video with cookies
 ydl_opts = {
-    'outtmpl': '/tmp/downloaded_video.%(ext)s',  # Use /tmp for GitHub Actions
+    'outtmpl': '/tmp/downloaded_video.%(ext)s',
     'format': 'best',
     'quiet': True,
+    'cookiefile': 'cookies.txt',  # Reference the cookies file
 }
 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(VIDEO_URL, download=True)
